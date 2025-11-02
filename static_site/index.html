@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ApplyBot (Static)</title>
+  <link rel="icon" type="image/svg+xml" href="../ApplyBot/app/static/favicon.svg" />
+  <link rel="stylesheet" href="../ApplyBot/app/static/style.css" />
+  <meta name="description" content="Static version of the ApplyBot landing page." />
+  <style>
+    /* Static specific overrides */
+    .offline-note {margin-top:1rem;font-size:.75rem;color:var(--muted);}    
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="top-bar">
+        <h1>ApplyBot <span id="versionTag" style="font-size:.55em;font-weight:600;color:var(--muted);">v...</span></h1>
+        <div class="top-actions">
+          <button id="themeToggle" class="btn small" aria-label="Toggle color theme">🌙</button>
+        </div>
+      </div>
+      <p class="subtitle">AI-powered automation for job discovery, project matching, resume & cover letter generation.</p>
+      <div class="cta-group">
+        <a href="http://localhost:8000/docs" class="btn primary">API Docs</a>
+        <a href="http://localhost:8000/redoc" class="btn">ReDoc</a>
+        <a href="https://github.com/Kcodess2807/ApplyBot" target="_blank" rel="noopener" class="btn ghost">GitHub</a>
+      </div>
+      <div class="status-row">
+        <span id="uptimeBadge" class="badge badge-loading" title="Service status">Checking...</span>
+        <span id="uptimePercent" class="badge" style="margin-left:.5rem;display:none;">--%</span>
+      </div>
+      <div class="offline-note">Static mode: dynamic values fetched from running backend if available.</div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section>
+      <h2>What is ApplyBot?</h2>
+      <p>This static build mirrors the FastAPI landing page. If your backend is running at <code>http://localhost:8000</code>, version and health info will populate automatically.</p>
+    </section>
+
+    <section>
+      <h2>Key Features</h2>
+      <div class="features-grid">
+        <div class="feature"><h3>Job Aggregation</h3><p>Multi-source job fetching with deduplication.</p></div>
+        <div class="feature"><h3>ML Matching</h3><p>TF-IDF + keyword + tech alignment scoring.</p></div>
+        <div class="feature"><h3>Resume Engine</h3><p>LaTeX / ReportLab PDF generation.</p></div>
+        <div class="feature"><h3>AI Cover Letters</h3><p>Groq & OpenAI with template fallback.</p></div>
+        <div class="feature"><h3>REST API</h3><p>Versioned endpoints under /api/v1.</p></div>
+        <div class="feature"><h3>Deploy Ready</h3><p>Config, logging, health endpoints.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Run Locally</h2>
+      <pre class="code-block">python start_server_fixed.py
+# or
+uvicorn app.main:app --reload</pre>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container"><p>© <span id="year"></span> ApplyBot (Static)</p></div></footer>
+
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Theme toggle
+    const root = document.documentElement;
+    const toggleBtn = document.getElementById('themeToggle');
+    const storedTheme = localStorage.getItem('applybot-theme');
+    if (storedTheme) root.setAttribute('data-theme', storedTheme);
+    function updateToggle(){ toggleBtn.textContent = (root.getAttribute('data-theme')||'dark') === 'dark' ? '🌙' : '☀️'; }
+    updateToggle();
+    toggleBtn.addEventListener('click', () => { const next = root.getAttribute('data-theme')==='light'?'dark':'light'; root.setAttribute('data-theme', next); localStorage.setItem('applybot-theme', next); updateToggle(); });
+
+    // Fetch version & health if backend available
+    const versionTag = document.getElementById('versionTag');
+    const badge = document.getElementById('uptimeBadge');
+    const uptimeBadge = document.getElementById('uptimePercent');
+    const POLL_KEY = 'applybot-health-polls';
+    const WINDOW_HOURS = 24;
+    const INTERVAL_MS = 30000;
+
+    function loadPolls(){ try { return JSON.parse(localStorage.getItem(POLL_KEY) || '[]'); } catch { return []; } }
+    function savePolls(polls){ localStorage.setItem(POLL_KEY, JSON.stringify(polls)); }
+    function prune(polls){ const cutoff = Date.now() - WINDOW_HOURS*3600*1000; return polls.filter(p => p.t >= cutoff); }
+    function updateUptime(polls){ if(!polls.length){ uptimeBadge.style.display='none'; return; } const succ = polls.filter(p=>p.ok).length; const pct = (succ/polls.length)*100; uptimeBadge.style.display='inline-block'; uptimeBadge.textContent=pct.toFixed(1)+'%'; uptimeBadge.className='badge ' + (pct>99?'badge-ok':pct>95?'badge-warn':'badge-error'); }
+
+    async function poll(){
+      let polls = prune(loadPolls());
+      let ok=false;
+      try {
+        const apiRes = await fetch('http://localhost:8000/api');
+        if(apiRes.ok){ const apiData = await apiRes.json(); versionTag.textContent = 'v'+(apiData.version||'unk'); }
+        const res = await fetch('http://localhost:8000/health');
+        if(!res.ok) throw new Error();
+        const data = await res.json();
+        ok = data.status === 'healthy';
+        badge.textContent = ok ? 'Healthy' : 'Degraded';
+        badge.className = 'badge ' + (ok ? 'badge-ok' : 'badge-warn');
+      } catch(e){
+        badge.textContent = 'Offline';
+        badge.className = 'badge badge-error';
+      }
+      polls.push({ t: Date.now(), ok });
+      polls = prune(polls); savePolls(polls); updateUptime(polls);
+    }
+
+    updateUptime(prune(loadPolls()));
+    poll();
+    setInterval(poll, INTERVAL_MS);
+  </script>
+</body>
+</html>
