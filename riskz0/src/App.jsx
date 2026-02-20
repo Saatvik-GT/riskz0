@@ -99,16 +99,16 @@ function App() {
         <aside className="left-panel">
           <ProjectForm onSubmitSuccess={handlePredictionSuccess} />
           {lastPrediction && (
-            <PredictionResult 
-              prediction={lastPrediction} 
-              onClose={() => setLastPrediction(null)} 
+            <PredictionResult
+              prediction={lastPrediction}
+              onClose={() => setLastPrediction(null)}
             />
           )}
         </aside>
 
         <section className="right-panel">
           {kpiData && <KpiDashboard data={kpiData} />}
-          
+
           {projects.length > 0 ? (
             <RiskScoring projects={projects} />
           ) : (
@@ -128,7 +128,7 @@ function App() {
           )}
 
           <div className="bottom-grid">
-            <HistoricalReports />
+            <HistoricalReports projects={projects} kpiData={kpiData} />
             <ManagerInsights insights={insights} />
           </div>
 
