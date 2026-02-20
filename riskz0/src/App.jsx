@@ -7,7 +7,7 @@ import HistoricalReports from "./components/HistoricalReports";
 import ManagerInsights from "./components/ManagerInsights";
 import ProjectForm from "./components/ProjectForm";
 import PredictionResult from "./components/PredictionResult";
-import { Shield, RefreshCw, Trash2, Server } from "lucide-react";
+import { Shield, RefreshCw, Trash2, Server, Sun, Moon } from "lucide-react";
 import { fetchKpi, fetchProjects, fetchAlerts, fetchInsights, fetchTrends, clearProjects, healthCheck } from "./services/api";
 import "./App.css";
 
@@ -21,6 +21,16 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [serverStatus, setServerStatus] = useState("unknown");
   const [lastPrediction, setLastPrediction] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("riskz0-theme") || "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("riskz0-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   const loadAllData = useCallback(async () => {
     setLoading(true);
@@ -88,6 +98,9 @@ function App() {
             <Server size={14} />
             <span>{serverStatus === "online" ? "Server Online" : serverStatus === "offline" ? "Server Offline" : "Checking..."}</span>
           </div>
+          <button className="theme-toggle" onClick={toggleTheme} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
           <button className="refresh-btn" onClick={loadAllData} disabled={loading}>
             <RefreshCw size={16} className={loading ? "spin" : ""} />
             Refresh
