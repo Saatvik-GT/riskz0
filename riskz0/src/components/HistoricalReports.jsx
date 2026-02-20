@@ -1,7 +1,17 @@
 import { FileBarChart, Download, Archive, Eye } from "lucide-react";
-import { historicalReports } from "../data/mockData";
 
 export default function HistoricalReports() {
+  const reports = [
+    { 
+      id: 1, 
+      name: "Current Session Report", 
+      date: new Date().toISOString().split('T')[0], 
+      projects: "Active", 
+      avgRisk: "-",
+      status: "live" 
+    },
+  ];
+
   return (
     <div className="historical-reports">
       <h3 className="section-title">
@@ -9,7 +19,7 @@ export default function HistoricalReports() {
         Historical Reports
       </h3>
       <div className="reports-list">
-        {historicalReports.map((report) => (
+        {reports.map((report) => (
           <div key={report.id} className="report-card">
             <div className="report-card-top">
               <div className="report-info">
@@ -18,20 +28,16 @@ export default function HistoricalReports() {
                   <span>{report.date}</span>
                   <span>•</span>
                   <span>{report.projects} projects</span>
-                  <span>•</span>
-                  <span>Avg Risk: {report.avgRisk}</span>
+                  {report.avgRisk !== "-" && (
+                    <>
+                      <span>•</span>
+                      <span>Avg Risk: {report.avgRisk}</span>
+                    </>
+                  )}
                 </div>
               </div>
-              <span
-                className={`report-status ${
-                  report.status === "completed" ? "report-completed" : "report-archived"
-                }`}
-              >
-                {report.status === "completed" ? (
-                  <Archive size={12} />
-                ) : (
-                  <Archive size={12} />
-                )}
+              <span className={`report-status report-${report.status}`}>
+                <Archive size={12} />
                 {report.status}
               </span>
             </div>
@@ -46,6 +52,9 @@ export default function HistoricalReports() {
           </div>
         ))}
       </div>
+      <p className="reports-note">
+        Add projects to generate risk assessment reports
+      </p>
     </div>
   );
 }

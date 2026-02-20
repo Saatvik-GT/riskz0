@@ -1,7 +1,20 @@
 import { Lightbulb, ArrowRight, Users, Calendar, Gauge, Star } from "lucide-react";
-import { managerInsights } from "../data/mockData";
 
-export default function ManagerInsights() {
+export default function ManagerInsights({ insights }) {
+  if (!insights || insights.length === 0) {
+    return (
+      <div className="manager-insights">
+        <h3 className="section-title">
+          <Lightbulb size={18} />
+          Manager Insights
+        </h3>
+        <div className="insights-empty">
+          <p>Add projects to generate insights</p>
+        </div>
+      </div>
+    );
+  }
+
   const getPriorityClass = (priority) => {
     switch (priority) {
       case "high":
@@ -18,6 +31,7 @@ export default function ManagerInsights() {
   const getCategoryIcon = (category) => {
     switch (category) {
       case "resource":
+      case "risk":
         return <Users size={16} />;
       case "schedule":
         return <Calendar size={16} />;
@@ -37,7 +51,7 @@ export default function ManagerInsights() {
         Manager Insights
       </h3>
       <div className="insights-list">
-        {managerInsights.map((insight) => (
+        {insights.map((insight) => (
           <div key={insight.id} className="insight-card">
             <div className="insight-card-header">
               <div className="insight-category-icon">

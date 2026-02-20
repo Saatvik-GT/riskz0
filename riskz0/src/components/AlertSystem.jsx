@@ -1,9 +1,8 @@
 import { Bell, AlertTriangle, AlertCircle, Info, Check } from "lucide-react";
 import { useState } from "react";
-import { alerts as alertData } from "../data/mockData";
 
-export default function AlertSystem() {
-  const [alerts, setAlerts] = useState(alertData);
+export default function AlertSystem({ alerts: initialAlerts }) {
+  const [alerts, setAlerts] = useState(initialAlerts || []);
   const [filter, setFilter] = useState("all");
 
   const getIcon = (type) => {
@@ -25,6 +24,8 @@ export default function AlertSystem() {
 
   const filtered =
     filter === "all" ? alerts : alerts.filter((a) => a.type === filter);
+
+  if (!initialAlerts || initialAlerts.length === 0) return null;
 
   return (
     <div className="alert-system">

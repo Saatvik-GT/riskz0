@@ -1,7 +1,8 @@
 import { Shield, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { riskScores } from "../data/mockData";
 
-export default function RiskScoring() {
+export default function RiskScoring({ projects }) {
+  if (!projects || projects.length === 0) return null;
+
   const getTrendIcon = (trend) => {
     switch (trend) {
       case "up":
@@ -40,12 +41,12 @@ export default function RiskScoring() {
               <th>Risk Score</th>
               <th>Status</th>
               <th>Trend</th>
-              <th>Progress</th>
+              <th>Confidence</th>
             </tr>
           </thead>
           <tbody>
-            {riskScores.map((row) => (
-              <tr key={row.project}>
+            {projects.map((row) => (
+              <tr key={row.id || row.project}>
                 <td className="project-name">{row.project}</td>
                 <td>
                   <div className="score-cell">
@@ -55,23 +56,20 @@ export default function RiskScoring() {
                         style={{ width: `${row.score * 10}%` }}
                       />
                     </div>
-                    <span className="score-value">{row.score}</span>
+                    <span className="score-value">{row.score.toFixed(1)}</span>
                   </div>
                 </td>
                 <td>
                   <span className={`status-badge ${getStatusClass(row.status)}`}>
-                    {row.status}
+                    {row.risk_level || row.status}
                   </span>
                 </td>
                 <td className="trend-cell">
                   {getTrendIcon(row.trend)}
                 </td>
                 <td>
-                  <span className="progress-text">
-                    {row.completed}/{row.tasks}
-                  </span>
-                  <span className="delayed-text">
-                    ({row.delayed} delayed)
+                  <span className="confidence-text">
+                    {(row.confidence * 100).toFixed(1)}%
                   </span>
                 </td>
               </tr>

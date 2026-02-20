@@ -6,51 +6,52 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { kpiData } from "../data/mockData";
 
-export default function KpiDashboard() {
+export default function KpiDashboard({ data }) {
+  if (!data) return null;
+
   const cards = [
     {
       label: "Total Projects",
-      value: kpiData.totalProjects,
+      value: data.totalProjects,
       icon: <Target size={22} />,
       color: "blue",
-      change: "+3 this quarter",
+      change: "Analyzed projects",
     },
     {
       label: "At Risk",
-      value: kpiData.atRiskProjects,
+      value: data.atRiskProjects,
       icon: <AlertTriangle size={22} />,
       color: "red",
-      change: "+2 from last week",
+      change: "Critical + High risk",
     },
     {
-      label: "Delayed Tasks",
-      value: kpiData.delayedTasks,
+      label: "Critical",
+      value: data.criticalCount,
       icon: <Clock size={22} />,
       color: "orange",
-      change: "+5 this sprint",
+      change: "Immediate attention",
     },
     {
       label: "Avg Risk Score",
-      value: kpiData.avgRiskScore,
+      value: data.avgRiskScore?.toFixed(2) || 0,
       icon: <Activity size={22} />,
       color: "yellow",
-      change: "↑ 0.8 from last month",
+      change: "Scale: 0-10",
     },
     {
-      label: "Completion Rate",
-      value: `${kpiData.completionRate}%`,
+      label: "Confidence",
+      value: `${data.avgConfidence || 0}%`,
       icon: <CheckCircle size={22} />,
       color: "green",
-      change: "↓ 5% this sprint",
+      change: "Model confidence",
     },
     {
       label: "Active Alerts",
-      value: kpiData.activeAlerts,
+      value: data.activeAlerts,
       icon: <TrendingUp size={22} />,
       color: "purple",
-      change: "2 critical",
+      change: "Requires attention",
     },
   ];
 

@@ -14,7 +14,6 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { trendData, completionData } from "../data/mockData";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload) return null;
@@ -30,7 +29,9 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-export default function TrendAnalysis() {
+export default function TrendAnalysis({ trendData, completionData }) {
+  if (!trendData || trendData.length === 0) return null;
+
   return (
     <div className="trend-analysis">
       <h3 className="section-title">
@@ -65,61 +66,55 @@ export default function TrendAnalysis() {
         </div>
 
         <div className="chart-card">
-          <h4>Task Velocity</h4>
+          <h4>Model Confidence</h4>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="week" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
+              <YAxis stroke="#64748b" fontSize={12} domain={[0, 100]} />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
-                dataKey="tasksCompleted"
+                dataKey="confidence"
                 stroke="#10b981"
                 strokeWidth={2}
                 dot={{ r: 4 }}
-                name="Completed"
-              />
-              <Line
-                type="monotone"
-                dataKey="tasksDelayed"
-                stroke="#f59e0b"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                name="Delayed"
+                name="Confidence %"
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-card chart-card-pie">
-          <h4>Project Status Distribution</h4>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={completionData}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={85}
-                paddingAngle={4}
-                dataKey="value"
-              >
-                {completionData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                formatter={(value) => (
-                  <span style={{ color: "#94a3b8", fontSize: 12 }}>{value}</span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        {completionData && completionData.length > 0 && (
+          <div className="chart-card chart-card-pie">
+            <h4>Project Status Distribution</h4>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={completionData.filter(d => d.value > 0)}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={85}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {completionData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  formatter={(value) => (
+                    <span style={{ color: "#94a3b8", fontSize: 12 }}>{value}</span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
     </div>
   );
